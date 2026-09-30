@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface text-on-surface font-sans antialiased;
+  overscroll-behavior: none;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+input[type='file'] {
+  @apply hidden;
+}
+
+/* --- Balotario (botón de voto) ----------------------------------------- */
+/* Plano y sólido, como el sistema Assembly Precision: sin degradados.
+   La "luz interior" y el resplandor de color los aporta el box-shadow. */
+.vote-tile {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s ease;
+}
+
+.vote-tile:hover {
+  transform: translateY(-2px);
+}
+
+.vote-tile:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.vote-tile__arrow {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vote-tile:hover .vote-tile__arrow {
+  transform: translateX(4px);
+}
+
+/* --- Ranura de tiempo que se agota ------------------------------------- */
+.time-rail__fill {
+  transform-origin: left center;
+  transition:
+    transform 0.3s linear,
+    background-color 0.4s ease;
+}
+
+/* --- Accesibilidad: respeta las preferencias de movimiento ------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .vote-tile:hover,
+  .vote-tile:active,
+  .vote-tile:hover .vote-tile__arrow {
+    transform: none;
+  }
+}

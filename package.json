@@ -1,0 +1,19 @@
+{
+  "name": "votacion-mocion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @votacion/web",
+    "build": "npm run build -w @votacion/web",
+    "preview": "npm run preview -w @votacion/web",
+    "typecheck": "npm run typecheck -w @votacion/shared && npm run typecheck -w @votacion/web"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}
