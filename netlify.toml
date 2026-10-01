@@ -4,7 +4,11 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
+  # Vite incrusta las variables VITE_* en el bundle del cliente de forma intencional
+  # (son públicas por diseño: URL y anon/publishable key de Supabase).
+  # Le decimos a Netlify que no las trate como fuga de secretos en el escaneo.
+  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_ADMIN_EMAIL"
 
 # Las rutas /sala y /admin las maneja React Router (SPA).
 [[redirects]]
