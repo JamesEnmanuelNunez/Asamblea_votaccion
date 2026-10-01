@@ -1,7 +1,13 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ADMIN_EMAIL, isSupabaseConfigured, supabase } from '@/lib/supabase';
-import { fetchMyMember, registerMember, uploadPhoto } from '@/lib/api';
+import {
+  DUPLICATE_NAME_MESSAGE,
+  fetchMyMember,
+  isNameTaken,
+  registerMember,
+  uploadPhoto,
+} from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import Avatar from '@/components/Avatar';
 import SetupBanner from '@/components/SetupBanner';
@@ -52,13 +58,17 @@ export default function LoginPage() {
   async function handleJoin(event: FormEvent) {
     event.preventDefault();
     if (!isSupabaseConfigured) return;
-    if (!name.trim()) {
+    const cleanName = name.trim();
+    if (!cleanName) {
       setError('Escribe tu nombre para continuar.');
       return;
     }
     setSubmitting(true);
     setError(null);
     try {
+      // Comprueba el nombre ANTES de crear la sesión anónima (evita usuarios huérfanos).
+      if (await isNameTaken(cleanName)) throw new Error(DUPLICATE_NAME_MESSAGE);
+
       let userId = session?.user.id;
       if (!userId) {
         const { data, error: authError } = await supabase.auth.signInAnonymously();
@@ -70,7 +80,7 @@ export default function LoginPage() {
       let photoUrl: string | null = null;
       if (photoFile) photoUrl = await uploadPhoto(userId, photoFile);
 
-      await registerMember(userId, name.trim(), photoUrl);
+      await registerMember(userId, cleanName, photoUrl);
       navigate('/sala', { replace: true });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo acceder.');

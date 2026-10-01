@@ -41,6 +41,10 @@ create table if not exists public.members (
   created_at timestamptz not null default now()
 );
 
+-- Evita nombres repetidos (ignora mayúsculas/minúsculas y espacios extremos).
+create unique index if not exists members_name_unique
+  on public.members (lower(btrim(name)));
+
 -- ============================== MOTIONS =====================================
 do $$ begin
   create type public.motion_status as enum ('idle', 'voting', 'concluded');

@@ -39,6 +39,23 @@ export async function fetchMyMember(id: string): Promise<Member | null> {
   return (data as Member) ?? null;
 }
 
+/**
+ * ¿Ya existe un participante con ese nombre? (ignora mayúsculas y espacios).
+ * Consulta pública: funciona incluso antes de iniciar sesión anónima.
+ */
+export async function isNameTaken(name: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from(TABLES.members)
+    .select('id')
+    .ilike('name', name.trim())
+    .limit(1);
+  if (error) throw error;
+  return (data?.length ?? 0) > 0;
+}
+
+export const DUPLICATE_NAME_MESSAGE =
+  'Ese nombre ya está en uso. Agrega un apellido o una inicial para distinguirte.';
+
 export async function registerMember(
   id: string,
   name: string,
@@ -46,8 +63,12 @@ export async function registerMember(
 ): Promise<void> {
   const { error } = await supabase
     .from(TABLES.members)
-    .upsert({ id, name, photo_url: photoUrl });
-  if (error) throw error;
+    .upsert({ id, name: name.trim(), photo_url: photoUrl });
+  if (error) {
+    // 23505 = unique_violation: alguien tomó el nombre justo antes (carrera).
+    if (error.code === '23505') throw new Error(DUPLICATE_NAME_MESSAGE);
+    throw error;
+  }
 }
 
 export async function uploadPhoto(userId: string, file: File): Promise<string> {
